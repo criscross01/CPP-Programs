@@ -1,0 +1,4 @@
+﻿  Start.cpp
+c:\users\cta9207\source\repos\glfw test\start.cpp(8): error C2065: 'string': undeclared identifier
+c:\users\cta9207\source\repos\glfw test\start.cpp(8): error C2146: syntax error: missing ';' before identifier 'success'
+c:\users\cta9207\source\repos\glfw test\start.cpp(8): error C2065: 'success': undeclared identifier
