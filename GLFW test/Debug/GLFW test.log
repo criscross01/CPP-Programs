@@ -1,4 +1,2 @@
 ﻿  Start.cpp
-c:\users\cta9207\source\repos\glfw test\start.cpp(8): error C2065: 'string': undeclared identifier
-c:\users\cta9207\source\repos\glfw test\start.cpp(8): error C2146: syntax error: missing ';' before identifier 'success'
-c:\users\cta9207\source\repos\glfw test\start.cpp(8): error C2065: 'success': undeclared identifier
+  GLFW test.vcxproj -> C:\Users\G3258\Desktop\Repositories\CPP-Programs\GLFW test\Debug\GLFW test.exe
