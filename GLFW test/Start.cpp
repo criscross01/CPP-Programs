@@ -1,116 +1,101 @@
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <iostream>
-#include <string>
+#include <GLFW\glfw3.h>
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow *window);
+#include <iostream>
+#include <fstream>
+
+#include "shader.h"
+#include "stb_image.h"
+
+using namespace std;
+
+int width{ 800 }, height{ 600 };
+const char* title{ "What I saw dude" };
+
+float vertices[] = {
+	-0.5f,-0.5f,0.0f,
+	 0.5f,-0.5f,0.0f,
+	 0.0f, 0.5f,0.0f
+};
+
+void glFramebufferSizeCallback(GLFWwindow* window, int width, int height);
+void procesInput(GLFWwindow* window);
 
 int main()
 {
-	//Initializes glfw variable and assign return value to check if initialization was a success
-	bool initErr = glfwInit();
-
-	//Checks to see if initialization worked
-	if (!initErr) { return -1; }
-
+	if (!glfwInit())
+	{
+		cerr << "GLFW INITIALIZATION FAILED!" << endl;
+		cin.get();
+		return -1;
+	}
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	//Makes window object
-	GLFWwindow* window = glfwCreateWindow(800, 600, "GLFW test", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(width, height, title, NULL, NULL);
 	if (window == NULL)
 	{
-		std::cout << "Failed to create GLFW window" << std::endl;
+		cerr << "WINDOW IS NULL" << endl;
 		glfwTerminate();
 		return -1;
 	}
-	//Makes the current context of the thread the window
 	glfwMakeContextCurrent(window);
 
-	//True if GLAD not initialized
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
-		std::cout << "Failed to initialize GLAD" << std::endl;
+		cerr << "LOADING GLAD FAILED" << endl;
 		return -1;
 	}
+	glViewport(0, 0, width, height);
 
-	//Sets up the viewport
-	glViewport(0, 0, 800, 600);
+	glfwSetFramebufferSizeCallback(window, glFramebufferSizeCallback);
 
-	//Sets up to where everytime the window is resized, it calls the framebuffer_size_callback
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	Shader shader("vertexShader.txt","fragmentShader.txt");
 
-	float vertices[] = {
-		-0.5f,-0.5f, 0.0f,
-		0.5f,-0.5f,0.0f,
-		0.0f,0.5f,0.0f
-	};
+	int tWidth, tHeight, nrChannels;
 
-	unsigned int VBO;
+	unsigned char *data = stbi_load("Container.jpg", &width, &height, &nrChannels, 0);
+
+	unsigned int VBO, VAO; 
+
+	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 
+	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	const char *vertexShaderSource = "#version 330 core\n"
-		"layout (location = 0) in vec3 aPos;\n"
-		"void main()\n"
-		"{\n"
-		"	FragColor = vec4(1.0f,0.5f,0.2f,1.0f);\n"
-		"}\n\0";
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
 
-	unsigned int vertexShader;
-	vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glBindVertexArray(0);
 
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	glCompileShader(vertexShader);
-
-	int success;
-	char infoLog[512];
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-
-	if (!success)
-	{
-		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-
-
-
-
-
-	//Render loop
 	while (!glfwWindowShouldClose(window))
 	{
-		//Gets input
-		processInput(window);
+		procesInput(window);
 
-		//Rendering
-		glClearColor(0.3f, 1.0f, 0.3f, 1.0f);
+		glClearColor(0.26f, 0.93f, 0.75f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
+		shader.use();
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
 
-		//Check and call events and swap buffers
+		glfwSwapBuffers(window);
 		glfwPollEvents();
-		glfwSwapBuffers(window);		
 	}
 
-
-
 	glfwTerminate();
-
 	return 0;
 }
 
-//Called when window is resized
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+void glFramebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
 }
 
-//Processes input
-void processInput(GLFWwindow *window)
+void procesInput(GLFWwindow* window)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
