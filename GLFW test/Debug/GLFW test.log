@@ -1,4 +1,1 @@
-﻿  Start.cpp
-c:\users\g3258\desktop\repositories\cpp-programs\glfw test\start.cpp(62): warning C4101: 'tWidth': unreferenced local variable
-c:\users\g3258\desktop\repositories\cpp-programs\glfw test\start.cpp(62): warning C4101: 'tHeight': unreferenced local variable
-  GLFW test.vcxproj -> C:\Users\G3258\Desktop\Repositories\CPP-Programs\GLFW test\Debug\GLFW test.exe
+﻿  GLFW test.vcxproj -> C:\Users\cta9207\Desktop\Repositories\CPP-Programs\GLFW test\Debug\GLFW test.exe

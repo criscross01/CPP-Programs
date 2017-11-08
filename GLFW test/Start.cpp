@@ -13,9 +13,9 @@ int width{ 800 }, height{ 600 };
 const char* title{ "What I saw dude" };
 
 float vertices[] = {
-	-0.5f,-0.5f,0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f, //Bottom Left
+	-0.5f,-0.5f,0.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, //Bottom Left
 	 0.5f,-0.5f,0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f, //Bottom Right
-	 0.5f, 0.5f,0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, //Top Right
+	 0.5f, 0.5f,0.0f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f, //Top Right
 	 -0.5f,0.5f,0.0f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f  //Top Left
 };
 
@@ -57,26 +57,7 @@ int main()
 
 	glfwSetFramebufferSizeCallback(window, glFramebufferSizeCallback);
 
-	Shader shader("vertexShader.txt","fragmentShader.txt");
-
-	int tWidth, tHeight, nrChannels;
-
-	unsigned char *data = stbi_load("Container.jpg", &width, &height, &nrChannels, 0);
-
-	unsigned int texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	glGenerateMipmap(GL_TEXTURE_2D);
-
-	stbi_image_free(data);
-
+	Shader shader("vertexShader.txt", "fragmentShader.txt");
 
 	unsigned int VBO, VAO, EBO; 
 
@@ -91,7 +72,7 @@ int main()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index), index, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
@@ -102,15 +83,70 @@ int main()
 
 	glBindVertexArray(0);
 
+	unsigned int texture1, texture2;
+	glGenTextures(1, &texture1);
+
+	glBindTexture(GL_TEXTURE_2D, texture1);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	int tWidth, tHeight, nrChannels;
+
+	unsigned char *data = stbi_load("container.jpg", &tWidth, &tHeight, &nrChannels, 0);
+
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tWidth, tHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		cerr << "Failed to load texture" << endl;
+		return -1;
+	}
+	stbi_image_free(data);
+	
+	glGenTextures(1, &texture2);
+	glBindTexture(GL_TEXTURE_2D, texture2);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	data = stbi_load("awesomeface.png", &tWidth, &tHeight, &nrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tWidth, tHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{ 
+		cerr << "ERROR LOADING TEXTURES" << endl;
+		return -1;
+	}
+	stbi_image_free(data);
+
+	shader.use();
+
+	shader.setInt("texture1", 0);
+	shader.setInt("texture2", 1);
+
 	while (!glfwWindowShouldClose(window))
 	{
 		procesInput(window);
 
 		glClearColor(0.26f, 0.93f, 0.75f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture1);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture2);
+
 		shader.use();
 		glBindVertexArray(VAO);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 		//glDrawArrays(GL_TRIANGLES, 0, 3);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,0);
 
