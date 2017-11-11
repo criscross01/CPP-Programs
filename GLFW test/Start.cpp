@@ -4,7 +4,9 @@
 #include <iostream>
 #include <fstream>
 
-
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "shader.h"
 #include "stb_image.h"
@@ -135,6 +137,12 @@ int main()
 
 	shader.setInt("texture1", 0);
 	shader.setInt("texture2", 1);
+
+	glm::mat4 trans;
+	trans = glm::rotate(trans, glm::radians(60.0f), glm::vec3(1.0,0.0,0.0f));
+	trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
+
+	glUniformMatrix4fv(glGetUniformLocation(shader.ID, "transform"), 1, GL_FALSE, glm::value_ptr(trans));
 
 	while (!glfwWindowShouldClose(window))
 	{
